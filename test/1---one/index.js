@@ -1,7 +1,6 @@
 const fs = require('fs');
-
 module.exports = {
-  name: __dirname.split('/').pop(),
+  name: __dirname.split('/').pop(), //// 1---one
   args: [
     fs.readFileSync(__dirname + '/input.txt', 'utf-8'),
     "the",

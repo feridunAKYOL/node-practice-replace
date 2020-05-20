@@ -12,6 +12,12 @@ app.use(bodyParser.json());
 
 // GET: '/files'
 // response: {status: 'ok', files: ['all.txt','file.txt','names.txt']}
+const list = fs.readdirSync(path.join(__dirname, 'files'));
+
+app.get('/files' , (req,res) =>{
+  res.json({ status: 'ok', files: list })
+})
+
 
 // POST: '/files/add/:name'
 //  body: {text: "file contents"}
