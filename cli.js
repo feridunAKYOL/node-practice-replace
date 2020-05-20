@@ -1,3 +1,13 @@
+const express = require('express');
+const fs = require('fs');
+const util = require('util');
+const path = require('path');
+
+const replace = require('./logic/index');
+
+const readFile = util.promisify(fs.readFileSync);
+const writeFile = util.promisify(fs.writeFile);
+
 /* write a CLI interface for the "replace" function and your files
 
   command line arguments:
@@ -28,3 +38,25 @@
 
 */
 
+const fileName = process.argv[2];
+
+const toReplace = process.argv[3];
+const withThis = process.argv[4];
+const targetFile = process.argv[5];
+const list = fs.readdirSync(path.join(__dirname, 'files'));
+
+if (!toReplace || !withThis || !targetFile || !fileName) {
+	console.log(`you should enter " $ node cli.js <read file> <old string> <new string> <target file>" `);
+} else {
+	if (!list.includes(fileName)) {
+		console.log('you must enter a valid file for reading');
+	} else {
+		const FILE_PATH = path.join(__dirname, 'files', fileName);
+		const FILE_TARGET_PATH = path.join(__dirname, 'files', targetFile);
+		const text = fs.readFileSync(FILE_PATH, 'utf-8');
+
+		const newText = replace(text, toReplace, withThis);
+
+		fs.writeFileSync(FILE_TARGET_PATH, newText);
+	}
+}
