@@ -37,26 +37,71 @@ const writeFile = util.promisify(fs.writeFile);
     log a list of all the file names in "./files"
 
 */
+const DOC_TYPE = `
+command line arguments:
+    1: the file you want to read from
+    2: the old string to replace
+    3: the new string to replace it with
+    4: the file you want to write to
 
-const fileName = process.argv[2];
+  examples:
+  $ node cli.js the-book-of-sand.txt the any sand-the-any.txt
+  $ node cli.js the-library-of-babel.txt f g library-f-g.txt
+  `;
+if (process.argv.includes('-h')) {
+	console.log(DOC_TYPE);
+	// this line tells Node to stop right now, done, end, finished.
+	//  it's kind of like an early return, but for a node app
+	process.exit(0);
+}
 
-const toReplace = process.argv[3];
-const withThis = process.argv[4];
-const targetFile = process.argv[5];
 const list = fs.readdirSync(path.join(__dirname, 'files'));
 
-if (!toReplace || !withThis || !targetFile || !fileName) {
-	console.log(`you should enter " $ node cli.js <read file> <old string> <new string> <target file>" `);
-} else {
-	if (!list.includes(fileName)) {
-		console.log('you must enter a valid file for reading');
+const entriesManager = (oldFile, newWord, oldWord, newFile) => {
+	if (oldFile == null) {
+		console.log(`a fileName is required  \nSee "node cli.js -h"`);
+		process.exit(0);
+	}
+	if (!list.includes(oldFile)) {
+		console.log('you must enter a valid file from "files" for reading');
+	}
+	if (newWord == null) {
+		console.log(`a string is required  \nSee "node cli.js -h"`);
+		process.exit(0);
+	}
+	if (oldWord == null) {
+		console.log(`another string is required to replace  \nSee "node cli.js -h"`);
+		process.exit(0);
+	}
+	if (newFile == null) {
+		console.log(`a fileName is required to write again \nSee "node cli.js -h"`);
+		process.exit(0);
 	} else {
-		const FILE_PATH = path.join(__dirname, 'files', fileName);
-		const FILE_TARGET_PATH = path.join(__dirname, 'files', targetFile);
+		const FILE_PATH = path.join(__dirname, 'files', oldFile);
+		const FILE_TARGET_PATH = path.join(__dirname, 'files', newFile);
+
+		// const readFileCb = (err) => {
+		// 	// step 4: handle file system error, or execute main app function
+		// 	if (err) {
+		// 		console.log(err);
+		// 		return;
+		// 	}
+		// };
 		const text = fs.readFileSync(FILE_PATH, 'utf-8');
 
-		const newText = replace(text, toReplace, withThis);
+		const newText = replace(text, newWord, oldWord);
 
-		fs.writeFileSync(FILE_TARGET_PATH, newText);
+		const writeFileCallback = (err) => {
+			// let the user know if their changes were successfully saved
+			if (err) {
+				console.log(err);
+			} else {
+				console.log('your changes were saved');
+			}
+		};
+
+		fs.writeFile(FILE_TARGET_PATH, newText, writeFileCallback);
 	}
-}
+};
+
+entriesManager(process.argv[2], process.argv[3], process.argv[4], process.argv[5]);
